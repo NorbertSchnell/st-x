@@ -28,7 +28,8 @@ const lowerFixPointDist = 3.2 * limbLength;
 
 const frictionAir = 0.3;
 const frictionStatic = 0.3;
-const stiffnessHigh = 0.333;
+const stiffnessHigh = 0.5;
+const stiffnessMedium = 0.1;
 const stiffnessLow = 0.000001;
 
 // left arm, right arm, left leg, right leg
@@ -52,7 +53,8 @@ const crossRenderOptions = {
 };
 
 const limbRenderOptions = {
-  fillStyle: 'transparent',
+  fillStyle: 'rgba(127, 127, 127, 0.75)',
+  strokeStyle: 'rgba(127, 127, 127, 1)',
   lineWidth: 1
 };
 
@@ -108,7 +110,7 @@ Composite.add(cross, Constraint.create({
   pointA: leftPoint,
   bodyB: crossHorizontalBar,
   pointB: { x: -0.5 * crossHorizontalLength, y: 0 },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessMedium,
   length: 0,
   render: fixationRenderOptions,
 }));
@@ -117,7 +119,7 @@ Composite.add(cross, Constraint.create({
   pointA: rightPoint,
   bodyB: crossHorizontalBar,
   pointB: { x: 0.5 * crossHorizontalLength, y: 0 },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessMedium,
   length: 0,
   render: fixationRenderOptions,
 }));
@@ -169,32 +171,26 @@ const lowerLeftLeg = stickman.bodies[5];
 const upperRightLeg = stickman.bodies[6];
 const lowerRightLeg = stickman.bodies[7];
 
+// create head
+const head = Bodies.circle(0, 0, headRadius, {
+  collisionFilter: { group: group },
+  frictionAir: frictionAir,
+  chamfer: 5,
+  render: limbRenderOptions,
+});
+
+Composite.add(stickman, head);
+
 // create torso
 const torso = Bodies.rectangle(0, 0, torsoLength + neckLength, limbWidth, {
   collisionFilter: { group: group },
   frictionAir: frictionAir,
   frictionStatic: frictionStatic,
   chamfer: 5,
-  render: {
-    fillStyle: 'transparent',
-    lineWidth: 1
-  },
+  render: limbRenderOptions,
 });
 
 Composite.add(stickman, torso);
-
-// create head
-const head = Bodies.circle(0, 0, headRadius, {
-  collisionFilter: { group: group },
-  frictionAir: frictionAir,
-  chamfer: 5,
-  render: {
-    fillStyle: 'transparent',
-    lineWidth: 1
-  },
-});
-
-Composite.add(stickman, head);
 
 engine.gravity.scale = 0.002;
 
@@ -302,7 +298,7 @@ const leftArmConstraint = Constraint.create({
   pointA: leftArmPoint,
   bodyB: lowerLeftArm,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessMedium,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -314,7 +310,7 @@ const rightArmConstraint = Constraint.create({
   pointA: rightArmPoint,
   bodyB: lowerRightArm,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessMedium,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -325,7 +321,7 @@ const leftLegConstraint = Constraint.create({
   pointA: leftLegPoint,
   bodyB: lowerLeftLeg,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessMedium,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -337,7 +333,7 @@ const rightLegConstraint = Constraint.create({
   pointA: rightLegPoint,
   bodyB: lowerRightLeg,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessMedium,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -385,7 +381,7 @@ function connect(...pattern) {
       const index = pattern[i];
 
       if (index > 0 && index <= 4) {
-        connection.constraint.stiffness = stiffnessHigh;
+        connection.constraint.stiffness = (index === 4) ? stiffnessMedium : stiffnessHigh;
         connection.point.x = points[index].x;
         connection.point.y = points[index].y;
         continue;
