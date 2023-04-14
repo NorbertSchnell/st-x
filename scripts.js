@@ -11,15 +11,9 @@ const Engine = Matter.Engine,
 
 const patternDisplay = document.getElementById('pattern-display');
 
-const width = 800;
-const height = 800;
-
 const headRadius = 20;
 const limbLength = 100;
 const limbWidth = 20;
-const crossHorizontalLength = 400;
-const crossVerticalLength = 700;
-const crossWidth = 30;
 const limbOverlap = 20;
 const torsoLength = 150;
 const neckLength = 10;
@@ -28,13 +22,16 @@ const lowerFixPointDist = 3.2 * limbLength;
 
 const frictionAir = 0.3;
 const frictionStatic = 0.3;
-const stiffnessHigh = 0.5;
-const stiffnessMedium = 0.1;
-const stiffnessLow = 0.000001;
+const stiffnessFixed = 0.5;
+const stiffnessElastic = 0.1;
+const stiffnessLoose = 0.000001;
+
+let width = document.documentElement.clientWidth;
+let height = document.documentElement.clientHeight;
 
 // left arm, right arm, left leg, right leg
 
-const center = { x: 0.5 * width, y: 0.333 * height };
+const center = { x: 0, y: 0};
 const leftPoint = { x: center.x - upperFixPointDist, y: center.y };
 const rightPoint = { x: center.x + upperFixPointDist, y: center.y };
 const upperPoint = { x: center.x, y: center.y - upperFixPointDist };
@@ -46,11 +43,6 @@ const lowerJoint = { x: 0.5 * limbLength - 0.5 * limbOverlap, y: 0 };
 const torsoHeadJoint = { x: -headRadius - 0.5 * torsoLength - 0.5 * neckLength, y: 0 };
 const torsoArmJoint = { x: -0.5 * torsoLength + 0.5 * limbOverlap + 0.5 * neckLength, y: 0 };
 const torsoLegJoint = { x: 0.5 * torsoLength - 0.5 * limbOverlap + 0.5 * neckLength, y: 0 };
-
-const crossRenderOptions = {
-  fillStyle: '#333',
-  lineWidth: 0
-};
 
 const limbRenderOptions = {
   fillStyle: 'rgba(127, 127, 127, 0.75)',
@@ -70,7 +62,6 @@ const fixationRenderOptions = {
   visible: false
 };
 
-const cross = Composite.create({ label: 'Cross' });
 const stickman = Composite.create({ label: 'Stickman' });
 
 // create engine
@@ -84,9 +75,28 @@ const render = Render.create({
   options: {
     width: width,
     height: height,
-    wireframes: false
+    wireframes: false,
+    background: 'transparent',
   }
 });
+
+setDimensions();
+
+function setDimensions() {
+  width = document.documentElement.clientWidth;
+  height = document.documentElement.clientHeight;
+
+  center.x = 0.5 * width;
+  center.y = 0.333 * height;
+  leftPoint.x = center.x - upperFixPointDist;
+  leftPoint.y = center.y;
+  rightPoint.x = center.x + upperFixPointDist;
+  rightPoint.y = center.y;
+  upperPoint.x = center.x;
+  upperPoint.y = center.y - upperFixPointDist;
+  lowerPoint.x = center.x;
+  lowerPoint.y = center.y + lowerFixPointDist;
+}
 
 Render.run(render);
 
@@ -96,60 +106,6 @@ Runner.run(runner, engine);
 
 // add bodies
 const group = Body.nextGroup(true);
-
-const crossHorizontalBar = Bodies.rectangle(0, 0, crossHorizontalLength, crossWidth, {
-  collisionFilter: { group: group },
-  frictionAir: frictionAir,
-  chamfer: 5,
-  render: crossRenderOptions,
-});
-
-Composite.add(cross, crossHorizontalBar);
-
-Composite.add(cross, Constraint.create({
-  pointA: leftPoint,
-  bodyB: crossHorizontalBar,
-  pointB: { x: -0.5 * crossHorizontalLength, y: 0 },
-  stiffness: stiffnessMedium,
-  length: 0,
-  render: fixationRenderOptions,
-}));
-
-Composite.add(cross, Constraint.create({
-  pointA: rightPoint,
-  bodyB: crossHorizontalBar,
-  pointB: { x: 0.5 * crossHorizontalLength, y: 0 },
-  stiffness: stiffnessMedium,
-  length: 0,
-  render: fixationRenderOptions,
-}));
-
-const crossVerticalBar = Bodies.rectangle(0, 0, crossVerticalLength, crossWidth, {
-  collisionFilter: { group: group },
-  frictionAir: frictionAir,
-  chamfer: 5,
-  render: crossRenderOptions,
-});
-
-Composite.add(cross, crossVerticalBar);
-
-Composite.add(cross, Constraint.create({
-  pointA: upperPoint,
-  bodyB: crossVerticalBar,
-  pointB: { x: -0.5 * crossVerticalLength - 100, y: 0 },
-  stiffness: stiffnessHigh,
-  length: 0,
-  render: fixationRenderOptions,
-}));
-
-Composite.add(cross, Constraint.create({
-  pointA: lowerPoint,
-  bodyB: crossVerticalBar,
-  pointB: { x: 0.5 * crossVerticalLength - 100, y: 0 },
-  stiffness: stiffnessHigh,
-  length: 0,
-  render: fixationRenderOptions,
-}));
 
 for (let i = 0; i < 8; i++) {
   const limb = Bodies.rectangle(0, 0, limbLength, limbWidth, {
@@ -200,7 +156,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: lowerLeftArm,
   pointA: { ...lowerJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -211,7 +167,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: lowerRightArm,
   pointA: { ...lowerJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -222,7 +178,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: lowerLeftLeg,
   pointA: { ...lowerJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -233,7 +189,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: lowerRightLeg,
   pointA: { ...lowerJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -243,7 +199,7 @@ Composite.add(stickman, Constraint.create({
   bodyA: torso,
   bodyB: head,
   pointA: { ...torsoHeadJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -254,7 +210,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: upperLeftArm,
   pointA: { ...torsoArmJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -265,7 +221,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: upperRightArm,
   pointA: { ...torsoArmJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -276,7 +232,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: upperLeftLeg,
   pointA: { ...torsoLegJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -287,7 +243,7 @@ Composite.add(stickman, Constraint.create({
   bodyB: upperRightLeg,
   pointA: { ...torsoLegJoint },
   pointB: { ...upperJoint },
-  stiffness: stiffnessHigh,
+  stiffness: stiffnessFixed,
   length: 0,
   render: jointRenderOptions,
 }));
@@ -298,7 +254,7 @@ const leftArmConstraint = Constraint.create({
   pointA: leftArmPoint,
   bodyB: lowerLeftArm,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessMedium,
+  stiffness: stiffnessElastic,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -310,7 +266,7 @@ const rightArmConstraint = Constraint.create({
   pointA: rightArmPoint,
   bodyB: lowerRightArm,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessMedium,
+  stiffness: stiffnessElastic,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -321,7 +277,7 @@ const leftLegConstraint = Constraint.create({
   pointA: leftLegPoint,
   bodyB: lowerLeftLeg,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessMedium,
+  stiffness: stiffnessElastic,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -333,7 +289,7 @@ const rightLegConstraint = Constraint.create({
   pointA: rightLegPoint,
   bodyB: lowerRightLeg,
   pointB: { ...lowerJoint },
-  stiffness: stiffnessMedium,
+  stiffness: stiffnessElastic,
   length: 0,
   render: fixationRenderOptions,
 });
@@ -355,17 +311,39 @@ const connections = [
   }
 ];
 
-Composite.add(world, cross);
 Composite.add(world, stickman);
 
 // fit the render viewport to the scene
-Render.lookAt(render, {
-  min: { x: 0, y: 0 },
-  max: { x: width, y: height }
+// Render.lookAt(render, {
+//   min: { x: 0, y: 0 },
+//   max: { x: width, y: height }
+// });
+
+window.addEventListener('resize', () => {
+  setDimensions();
+  render.canvas.width = width;
+  render.canvas.height = height;
+  connect(...pattern);
 });
 
 const pattern = [1, 2, 4, 4];
 connect(...pattern);
+
+Events.on(engine, 'beforeUpdate', () => {
+  const ctx = render.canvas.getContext('2d');
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.333)';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.333)';
+  ctx.lineWidth = 10;
+  ctx.beginPath();
+  ctx.moveTo(upperPoint.x, 0);
+  ctx.lineTo(upperPoint.x, height);
+  ctx.moveTo(0, leftPoint.y);
+  ctx.lineTo(width, leftPoint.y);
+  ctx.stroke();
+});
 
 setInterval(() => {
   const index = Math.floor(pattern.length * Math.random());
@@ -381,14 +359,15 @@ function connect(...pattern) {
       const index = pattern[i];
 
       if (index > 0 && index <= 4) {
-        connection.constraint.stiffness = (index === 4) ? stiffnessMedium : stiffnessHigh;
+        const stiffness = (index === 4) ? stiffnessElastic : stiffnessFixed;
+        connection.constraint.stiffness = stiffness;
         connection.point.x = points[index].x;
         connection.point.y = points[index].y;
         continue;
       }
     }
 
-    connection.constraint.stiffness = stiffnessLow;
+    connection.constraint.stiffness = stiffnessLoose;
     connection.point.x = center.x;
     connection.point.y = center.y;
   }

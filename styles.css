@@ -11,7 +11,7 @@ body {
 
 #pattern-display {
   position: absolute;
-  left: 400px;
+  left: 50%;
   top: 20px;
   width: 200px;
   height: 1em;
