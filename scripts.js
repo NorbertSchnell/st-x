@@ -86,6 +86,9 @@ function setDimensions() {
   width = document.documentElement.clientWidth;
   height = document.documentElement.clientHeight;
 
+  render.canvas.width = width;
+  render.canvas.height = height;
+
   center.x = 0.5 * width;
   center.y = 0.333 * height;
   leftPoint.x = center.x - upperFixPointDist;
@@ -108,7 +111,7 @@ Runner.run(runner, engine);
 const group = Body.nextGroup(true);
 
 for (let i = 0; i < 8; i++) {
-  const limb = Bodies.rectangle(0, 0, limbLength, limbWidth, {
+  const limb = Bodies.rectangle(0.5 * width, 0.5 * height, limbLength, limbWidth, {
     collisionFilter: { group: group },
     frictionAir: frictionAir,
     chamfer: 5,
@@ -128,7 +131,7 @@ const upperRightLeg = stickman.bodies[6];
 const lowerRightLeg = stickman.bodies[7];
 
 // create head
-const head = Bodies.circle(0, 0, headRadius, {
+const head = Bodies.circle(0.5 * width, 0.5 * height, headRadius, {
   collisionFilter: { group: group },
   frictionAir: frictionAir,
   chamfer: 5,
@@ -138,7 +141,7 @@ const head = Bodies.circle(0, 0, headRadius, {
 Composite.add(stickman, head);
 
 // create torso
-const torso = Bodies.rectangle(0, 0, torsoLength + neckLength, limbWidth, {
+const torso = Bodies.rectangle(0.5 * width, 0.5 * height, torsoLength + neckLength, limbWidth, {
   collisionFilter: { group: group },
   frictionAir: frictionAir,
   frictionStatic: frictionStatic,
@@ -313,16 +316,8 @@ const connections = [
 
 Composite.add(engine.world, stickman);
 
-// fit the render viewport to the scene
-// Render.lookAt(render, {
-//   min: { x: 0, y: 0 },
-//   max: { x: width, y: height }
-// });
-
 window.addEventListener('resize', () => {
   setDimensions();
-  render.canvas.width = width;
-  render.canvas.height = height;
   connect(...pattern);
 });
 
