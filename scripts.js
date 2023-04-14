@@ -329,11 +329,36 @@ window.addEventListener('resize', () => {
 const pattern = [1, 2, 4, 4];
 connect(...pattern);
 
-setInterval(() => {
+function changePose() {
   const index = Math.floor(pattern.length * Math.random());
   pattern[index] = Math.floor(points.length * Math.random());
   connect(...pattern);
-}, 4000);
+}
+
+function randomizePose() {
+  for (let i = 0; i < pattern.length; i++) {
+    pattern[i] = Math.floor(5 * Math.random());
+  }
+  connect(...pattern);
+}
+
+let intervalId = setInterval(changePose, 4000);
+
+render.canvas.addEventListener('click', () => {
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+    intervalId = null;
+    patternDisplay.classList.add('stopped');
+  } else {
+    changePose();
+    intervalId = setInterval(changePose, 4000);
+    patternDisplay.classList.remove('stopped');
+  }
+});
+
+patternDisplay.addEventListener('click', (evt) => {
+  randomizePose();
+}, true);
 
 function connect(...pattern) {
   for (let i = 0; i < connections.length; i++) {
@@ -360,7 +385,6 @@ function connect(...pattern) {
 
   for (let index of pattern) {
     str += index;
-    str += ' ';
   }
 
   patternDisplay.innerText = str;
