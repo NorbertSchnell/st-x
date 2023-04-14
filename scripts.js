@@ -31,7 +31,7 @@ let height = document.documentElement.clientHeight;
 
 // left arm, right arm, left leg, right leg
 
-const center = { x: 0, y: 0};
+const center = { x: 0, y: 0 };
 const leftPoint = { x: center.x - upperFixPointDist, y: center.y };
 const rightPoint = { x: center.x + upperFixPointDist, y: center.y };
 const upperPoint = { x: center.x, y: center.y - upperFixPointDist };
@@ -65,8 +65,7 @@ const fixationRenderOptions = {
 const stickman = Composite.create({ label: 'Stickman' });
 
 // create engine
-const engine = Engine.create(),
-  world = engine.world;
+const engine = Engine.create();
 
 // create renderer
 const render = Render.create({
@@ -75,8 +74,9 @@ const render = Render.create({
   options: {
     width: width,
     height: height,
-    wireframes: false,
     background: 'transparent',
+    wireframeBackground: 'transparent',
+    wireframes: false,
   }
 });
 
@@ -311,7 +311,7 @@ const connections = [
   }
 ];
 
-Composite.add(world, stickman);
+Composite.add(engine.world, stickman);
 
 // fit the render viewport to the scene
 // Render.lookAt(render, {
@@ -328,22 +328,6 @@ window.addEventListener('resize', () => {
 
 const pattern = [1, 2, 4, 4];
 connect(...pattern);
-
-Events.on(engine, 'beforeUpdate', () => {
-  const ctx = render.canvas.getContext('2d');
-
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.333)';
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.333)';
-  ctx.lineWidth = 10;
-  ctx.beginPath();
-  ctx.moveTo(upperPoint.x, 0);
-  ctx.lineTo(upperPoint.x, height);
-  ctx.moveTo(0, leftPoint.y);
-  ctx.lineTo(width, leftPoint.y);
-  ctx.stroke();
-});
 
 setInterval(() => {
   const index = Math.floor(pattern.length * Math.random());

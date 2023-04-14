@@ -8917,11 +8917,20 @@ var Mouse = __webpack_require__(14);
             _applyBackground(render, background);
 
         // clear the canvas with a transparent fill, to allow the canvas background to show
-        context.globalCompositeOperation = 'source-in';
-        context.fillStyle = "transparent";
+        //context.globalCompositeOperation = 'source-in';
+        context.fillStyle = '#444';
         context.fillRect(0, 0, canvas.width, canvas.height);
-        context.globalCompositeOperation = 'source-over';
+        //context.globalCompositeOperation = 'source-over';
 
+        context.strokeStyle = '#222';
+        context.lineWidth = 5;
+        context.beginPath();
+        context.moveTo(upperPoint.x, 0);
+        context.lineTo(upperPoint.x, height);
+        context.moveTo(0, leftPoint.y);
+        context.lineTo(width, leftPoint.y);
+        context.stroke();
+      
         // handle bounds
         if (options.hasBounds) {
             // filter out bodies that are not in view
