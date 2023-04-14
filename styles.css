@@ -23,6 +23,7 @@ body {
   font-family: monospace;
   text-align: center;
   letter-spacing: 0.5rem;
+  cursor: pointer;
 }
 
 #pattern-display.stopped {
